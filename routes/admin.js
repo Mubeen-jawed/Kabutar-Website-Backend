@@ -22,7 +22,7 @@ router.post("/login", (req, res) => {
       res.cookie("admintoken", token, {
         httpOnly: true,
         sameSite: "lax",
-        secure: false, // set true in production with HTTPS
+        secure: true, // set true in production with HTTPS
         maxAge: 1000 * 60 * 60 * 24 * 2,
         path: "/", // make it visible to all paths
       });
@@ -30,7 +30,7 @@ router.post("/login", (req, res) => {
     }
     return res.status(401).json({ success: false, message: "Invalid credentials" });
   });
-  
+
 router.post("/logout", requireAdmin, (req, res) => {
   res.clearCookie("admintoken");
   res.json({ success: true });
