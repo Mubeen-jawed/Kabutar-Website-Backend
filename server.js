@@ -6,7 +6,12 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+    origin: ["http://localhost:5173", "https://kabutarmagazine.com"],
+    credentials: true,
+    methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    allowedHeaders: ["Content-Type","Authorization"],
+  }));
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
