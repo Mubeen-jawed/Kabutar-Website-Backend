@@ -23,6 +23,8 @@ router.post("/login", (req, res) => {
         httpOnly: true,
         sameSite: "lax",
         secure: true, // set true in production with HTTPS
+        sameSite: "none",        // allow cross-sitesecure: true,            // required with 
+        partitioned: true,
         maxAge: 1000 * 60 * 60 * 24 * 2,
         path: "/", // make it visible to all paths
       });
@@ -32,8 +34,13 @@ router.post("/login", (req, res) => {
   });
 
 router.post("/logout", requireAdmin, (req, res) => {
-  res.clearCookie("admintoken");
-  res.json({ success: true });
+    res.clearCookie("admintoken", {
+        path: "/",
+        sameSite: "none",
+        secure: true,
+        partitioned: true,
+      });
+      res.json({ success: true });
 });
 
 router.get("/me", requireAdmin, (req, res) => {
