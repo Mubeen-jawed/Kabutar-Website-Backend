@@ -5,7 +5,7 @@ require('dotenv').config();
 const s3 = new AWS.S3({
   accessKeyId: process.env.R2_ACCESS_KEY_ID,
   secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  endpoint: `https://pub-ca69aad99cee4c8ba79b57a1915d9c4a.r2.dev`,
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   region: 'Asia-Pacific', // R2 always uses 'auto'
   signatureVersion: 'v4',
 });
