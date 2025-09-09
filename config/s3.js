@@ -38,7 +38,7 @@ const uploadToS3 = (file, folder = 'uploads') => {
         reject(err);
       } else {
         // Construct public URL
-        const url = `https://${BUCKET_NAME}.${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${key}`;
+        const url = `https://pub-ca69aad99cee4c8ba79b57a1915d9c4a.r2.dev/${key}`;
         resolve({
           url,
           key,
