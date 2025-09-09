@@ -1,22 +1,12 @@
 // routes/uploads.js
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { uploadToS3 } = require("../config/s3");
 
 const router = express.Router();
 
-const UPLOAD_DIR = path.join(__dirname, "..", "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const base = path.basename(file.originalname, ext).replace(/\s+/g, "_");
-    cb(null, `${Date.now()}_${base}${ext}`);
-  },
-});
+// Configure multer to store files in memory for S3 upload
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -27,10 +17,29 @@ const upload = multer({
   },
 });
 
-router.post("/image", upload.single("image"), (req, res) => {
-  // Return a URL your frontend can reach; here we serve /uploads statically
-  const url = `/uploads/${req.file.filename}`;
-  res.json({ success: true, url });
+router.post("/image", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    // Upload to S3
+    const result = await uploadToS3(req.file, 'uploads');
+    
+    res.json({ 
+      success: true, 
+      url: result.url,
+      key: result.key,
+      fileName: result.fileName
+    });
+  } catch (error) {
+    console.error("S3 upload error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Upload failed", 
+      error: error.message 
+    });
+  }
 });
 
 module.exports = router;

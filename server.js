@@ -14,7 +14,7 @@ app.use(cors({
   }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Static file serving for uploads removed - now using S3
 
 mongoose.connect(process.env.MONGO_URI, { dbName: "kabutar" })
   .then(()=>console.log("MongoDB connected"))
