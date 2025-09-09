@@ -1,16 +1,17 @@
 const AWS = require('aws-sdk');
 require('dotenv').config();
 
-// Configure AWS S3
+// Configure R2 (S3-compatible)
 const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION || 'us-east-1'
+  accessKeyId: process.env.R2_ACCESS_KEY_ID,
+  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  region: 'auto', // R2 always uses 'auto'
+  signatureVersion: 'v4'
 });
 
-// S3 bucket configuration
-const BUCKET_NAME = process.env.S3_BUCKET_NAME;
-const BUCKET_REGION = process.env.AWS_REGION || 'us-east-1';
+// Bucket configuration
+const BUCKET_NAME = process.env.R2_BUCKET_NAME;
 
 // Generate a unique filename
 const generateFileName = (originalName) => {
@@ -19,7 +20,7 @@ const generateFileName = (originalName) => {
   return `${Date.now()}_${base}.${ext}`;
 };
 
-// Upload file to S3
+// Upload file to R2
 const uploadToS3 = (file, folder = 'uploads') => {
   return new Promise((resolve, reject) => {
     const fileName = generateFileName(file.originalname);
@@ -29,25 +30,26 @@ const uploadToS3 = (file, folder = 'uploads') => {
       Bucket: BUCKET_NAME,
       Key: key,
       Body: file.buffer,
-      ContentType: file.mimetype,
-      ACL: 'public-read' // Make the file publicly accessible
+      ContentType: file.mimetype
     };
 
     s3.upload(params, (err, data) => {
       if (err) {
         reject(err);
       } else {
+        // Construct public URL
+        const url = `https://${BUCKET_NAME}.${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${key}`;
         resolve({
-          url: data.Location,
-          key: key,
-          fileName: fileName
+          url,
+          key,
+          fileName
         });
       }
     });
   });
 };
 
-// Delete file from S3
+// Delete file from R2
 const deleteFromS3 = (key) => {
   return new Promise((resolve, reject) => {
     const params = {
@@ -69,6 +71,5 @@ module.exports = {
   s3,
   uploadToS3,
   deleteFromS3,
-  BUCKET_NAME,
-  BUCKET_REGION
+  BUCKET_NAME
 };
