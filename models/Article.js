@@ -3,29 +3,34 @@ const mongoose = require("mongoose");
 
 const ArticleSchema = new mongoose.Schema({
   // Public / content fields (matching your JSON)
-  slug:      { type: String, required: true, unique: true }, // maps JSON "id"
-  title:     { type: String, required: true },
-  author:    { type: String, required: true },
-  date:      { type: Date,   default: Date.now },            // JSON "date"
-  category:  { type: String, default: "" },                  // e.g., "Science"
-  tags:      { type: [String], default: [] },                // ["cosmology", ...]
-  cover:     { type: String, required: true },               // cover image URL
-  body:      { type: String, required: true },               // HTML content
+  slug: { type: String, required: true, unique: true }, // maps JSON "id"
+  title: { type: String, required: true },
+  author: { type: String, required: true },
+  date: { type: Date, default: Date.now }, // JSON "date"
+  category: { type: String, default: "" }, // e.g., "Science"
+  tags: { type: [String], default: [] },
+  email: { type: String, required: true }, // ["cosmology", ...]
+  cover: { type: String, required: true }, // cover image URL
+  body: { type: String, required: true }, // HTML content
 
   // Admin / moderation fields (kept from your current model)
-  status: { type: String, enum: ["draft", "submitted", "approved", "rejected"], default: "draft" },
-  feedback:    { type: String },
-  published:   { type: Boolean, default: false },
+  status: {
+    type: String,
+    enum: ["draft", "submitted", "approved", "rejected"],
+    default: "draft",
+  },
+  feedback: { type: String },
+  published: { type: Boolean, default: false },
   publishedAt: { type: Date },
-  reviewer:    { type: String },
+  reviewer: { type: String },
 
   // Meta
-  createdAt:   { type: Date, default: Date.now },
-  updatedAt:   { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // Keep updatedAt fresh
-ArticleSchema.pre("save", function(next){
+ArticleSchema.pre("save", function (next) {
   this.updatedAt = new Date();
   next();
 });
@@ -39,7 +44,7 @@ ArticleSchema.statics.slugify = function (s) {
     .replace(/^-+|-+$/g, "");
 };
 
-ArticleSchema.pre("validate", function(next) {
+ArticleSchema.pre("validate", function (next) {
   if (!this.slug && this.title) {
     this.slug = this.constructor.slugify(this.title);
   }
