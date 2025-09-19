@@ -38,6 +38,15 @@ router.post("/", async (req, res) => {
       excerpt: excerpt || "",
     });
 
+    await fetch(
+      "https://script.google.com/macros/s/AKfycbxwcYEnV2LztlOIvhB5u8ZBgsPDm429VptTv8yMrBuPAHvhMobjn6QeVTOQEv_7NYYSmA/exec",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
+
     res.json({ success: true, article: doc });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
